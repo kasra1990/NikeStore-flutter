@@ -67,7 +67,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
         bloc = CategoryBloc(categoryRepository);
         checkInternetConnection().asStream().listen((event) {
           if (event) {
-            print("Listening: $event");
+            debugPrint("Listening: $event");
             bloc!.add(CategoryStarted(userId: userId, category: "0"));
           } else {
             bloc!.add(CategoryNoInternetConnection());
@@ -92,7 +92,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                   hintStyle: TextStyle(fontSize: getFontSize(0.02)),
                   hintText: "Search here...",
                   prefixIconConstraints:
-                      BoxConstraints(maxWidth: 30, maxHeight: 30),
+                      const BoxConstraints(maxWidth: 30, maxHeight: 30),
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(17)),
                   focusedBorder: OutlineInputBorder(

@@ -1,3 +1,4 @@
+import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nike_flutter/common/color.dart';
@@ -21,6 +22,7 @@ class _SignInScreenState extends State<SignInScreen> {
   TextEditingController email = TextEditingController();
   TextEditingController pass = TextEditingController();
   bool passVisibility = true;
+  final formKey = GlobalKey<FormState>();
   String textMessage = "Please enter email and password";
 
   @override
@@ -64,93 +66,93 @@ class _SignInScreenState extends State<SignInScreen> {
             padding: EdgeInsets.only(top: getHeight(0.17)),
             child: SizedBox(
               width: double.infinity,
-              child: Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Image.asset("assets/icons/nike_logo.png",
-                        width: getWidth(0.25)),
-                    SizedBox(height: getHeight(0.03)),
-                    Text("Sing in",
-                        style: TextStyle(fontSize: getFontSize(0.02))),
-                    SizedBox(height: getHeight(0.02)),
-                    Text(textMessage,
-                        style: TextStyle(fontSize: getFontSize(0.016))),
-                    SizedBox(height: getHeight(0.02)),
-                    _myTextInput(inputName: "Email"),
-                    _myPasswordInput(),
-                    BlocBuilder<AuthBloc, AuthState>(
-                      builder: (context, state) {
-                        if (state is AuthLoading) {
-                          return const CircularProgressIndicator(
-                              color: mainColor);
-                        } else {
-                          return SizedBox(
-                            width: getWidth(0.8),
-                            height: getHeight(0.06),
-                            child: ElevatedButton(
-                                style: ButtonStyle(
-                                    backgroundColor:
-                                        MaterialStateProperty.resolveWith(
-                                            (states) {
-                                      if (!states
-                                          .contains(MaterialState.disabled)) {
-                                        return mainColor;
-                                      }
-                                    }),
-                                    shape: MaterialStateProperty.all(
-                                        RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(15)))),
-                                onPressed: () {
-                                  if (email.text.isNotEmpty &&
-                                      pass.text.isEmpty) {
-                                    setState(() {
-                                      textMessage =
-                                          "Please enter your password";
-                                    });
-                                  } else if (email.text.isNotEmpty &&
-                                      pass.text.isNotEmpty) {
-                                    checkInternetConnection()
-                                        .asStream()
-                                        .listen((event) {
-                                      if (event) {
-                                        BlocProvider.of<AuthBloc>(context)
-                                            .add(SignIn(email.text, pass.text));
-                                      } else {
-                                        BlocProvider.of<AuthBloc>(context)
-                                            .add(AuthNoInternetConnection());
-                                      }
-                                    });
-                                  }
-                                },
-                                child: const Text("Login")),
-                          );
-                        }
-                      },
-                    ),
-                    SizedBox(height: getHeight(0.2)),
-                    TextButton(
-                        style: ButtonStyle(
-                            foregroundColor:
-                                MaterialStateProperty.all(mainColor),
-                            overlayColor:
-                                MaterialStateProperty.all(Colors.transparent)),
-                        onPressed: () {},
-                        child: const Text("Forgot Password?")),
-                    TextButton(
-                        style: ButtonStyle(
-                            foregroundColor:
-                                MaterialStateProperty.all(mainColor),
-                            overlayColor:
-                                MaterialStateProperty.all(Colors.transparent)),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => const SignUpScreen()));
+              child: Form(
+                key: formKey,
+                child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Image.asset("assets/icons/nike_logo.png",
+                          width: getWidth(0.25)),
+                      SizedBox(height: getHeight(0.03)),
+                      Text("Sing in",
+                          style: TextStyle(fontSize: getFontSize(0.02))),
+                      SizedBox(height: getHeight(0.02)),
+                      Text(textMessage,
+                          style: TextStyle(fontSize: getFontSize(0.016))),
+                      SizedBox(height: getHeight(0.02)),
+                      _myTextInput(inputName: "Email"),
+                      _myPasswordInput(),
+                      SizedBox(height: getHeight(0.02)),
+                      BlocBuilder<AuthBloc, AuthState>(
+                        builder: (context, state) {
+                          if (state is AuthLoading) {
+                            return const CircularProgressIndicator(
+                                color: mainColor);
+                          } else {
+                            return SizedBox(
+                              width: getWidth(0.8),
+                              height: getHeight(0.06),
+                              child: ElevatedButton(
+                                  style: ButtonStyle(
+                                      backgroundColor:
+                                          MaterialStateProperty.resolveWith(
+                                              (states) {
+                                        if (!states
+                                            .contains(MaterialState.disabled)) {
+                                          return mainColor;
+                                        }
+                                      }),
+                                      shape: MaterialStateProperty.all(
+                                          RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(15)))),
+                                  onPressed: () {
+                                    final isValidForm =
+                                        formKey.currentState!.validate();
+                                    if (isValidForm) {
+                                      checkInternetConnection()
+                                          .asStream()
+                                          .listen((event) {
+                                        if (event) {
+                                          BlocProvider.of<AuthBloc>(context)
+                                              .add(SignIn(
+                                                  email.text, pass.text));
+                                        } else {
+                                          BlocProvider.of<AuthBloc>(context)
+                                              .add(AuthNoInternetConnection());
+                                        }
+                                      });
+                                    }
+                                  },
+                                  child: const Text("Login")),
+                            );
+                          }
                         },
-                        child: const Text("Sign Up")),
-                  ]),
+                      ),
+                      SizedBox(height: getHeight(0.15)),
+                      TextButton(
+                          style: ButtonStyle(
+                              foregroundColor:
+                                  MaterialStateProperty.all(mainColor),
+                              overlayColor: MaterialStateProperty.all(
+                                  Colors.transparent)),
+                          onPressed: () {},
+                          child: const Text("Forgot Password?")),
+                      TextButton(
+                          style: ButtonStyle(
+                              foregroundColor:
+                                  MaterialStateProperty.all(mainColor),
+                              overlayColor: MaterialStateProperty.all(
+                                  Colors.transparent)),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                            Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context) => const SignUpScreen()));
+                          },
+                          child: const Text("Sign Up")),
+                    ]),
+              ),
             ),
           ),
         ),
@@ -163,25 +165,31 @@ class _SignInScreenState extends State<SignInScreen> {
         width: getWidth(0.8),
         height: getHeight(0.1),
         child: TextFormField(
-          controller: email,
-          cursorColor: mainColor,
-          obscureText: inputName == "Email" ? false : true,
-          style: const TextStyle(color: mainColor),
-          keyboardType: TextInputType.emailAddress,
-          decoration: InputDecoration(
-              label: Text(inputName),
-              labelStyle: const TextStyle(color: mainColor),
-              focusedBorder: OutlineInputBorder(
+            controller: email,
+            cursorColor: mainColor,
+            obscureText: inputName == "Email" ? false : true,
+            style: const TextStyle(color: mainColor),
+            keyboardType: TextInputType.emailAddress,
+            decoration: InputDecoration(
+                label: Text(inputName),
+                labelStyle: const TextStyle(color: mainColor),
+                focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: mainColor)),
+                border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: mainColor)),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              suffixIcon: inputName == "Password"
-                  ? IconButton(
-                      onPressed: () {}, icon: const Icon(Icons.visibility))
-                  : null),
-        ));
+                ),
+                suffixIcon: inputName == "Password"
+                    ? IconButton(
+                        onPressed: () {}, icon: const Icon(Icons.visibility))
+                    : null),
+            validator: (value) {
+              if (value!.isEmpty || !EmailValidator.validate(value)) {
+                return "Please enter a valid email";
+              } else {
+                return null;
+              }
+            }));
   }
 
   Widget _myPasswordInput() {
@@ -211,6 +219,13 @@ class _SignInScreenState extends State<SignInScreen> {
                   icon: passVisibility
                       ? const Icon(Icons.visibility, color: Colors.grey)
                       : const Icon(Icons.visibility_off, color: Colors.grey))),
+          validator: (value) {
+            if (value!.isEmpty) {
+              return "Please enter your password";
+            } else {
+              return null;
+            }
+          },
         ));
   }
 
